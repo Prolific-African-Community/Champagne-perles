@@ -1,10 +1,33 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const cn = (...classes: unknown[]) => classes.filter(Boolean).join(" ");
+type ClassValue = string | false | null | undefined;
+const cn = (...classes: ClassValue[]): string => classes.filter(Boolean).join(" ");
+
+type CeremonyItem = {
+  time: string;
+  title: string;
+  details: string;
+  icon: string;
+};
+
+type CeremonyDay = {
+  dayKey: string;
+  dayLabel: string;
+  subtitle: string;
+  items: CeremonyItem[];
+};
+
+type Activity = {
+  title: string;
+  image: string;
+  text: string;
+};
+
+type ActivitiesByDay = Record<string, Record<string, string[]>>;
 
 const WEDDING_DATE_ISO = "2027-01-02T16:00:00+01:00";
 
-const CEREMONY_AGENDA = [
+const CEREMONY_AGENDA: CeremonyDay[] = [
   {
     dayKey: "Jeudi 31",
     dayLabel: "Jeudi 31",
@@ -100,7 +123,7 @@ const CEREMONY_AGENDA = [
   },
 ];
 
-const ACTIVITIES = [
+const ACTIVITIES: Activity[] = [
   {
     title: "Plage de Saly",
     image: "/saly.jpg",
@@ -153,7 +176,7 @@ const ACTIVITIES = [
   },
 ];
 
-const ACTIVITIES_BY_DAY = {
+const ACTIVITIES_BY_DAY: ActivitiesByDay = {
   Lundi: {
     Journée: [
       "Visite Île de Gorée",
@@ -180,11 +203,14 @@ const ACTIVITIES_BY_DAY = {
   },
 };
 
-function pad2(n) {
+function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
 
-function getCountdown(targetDate, nowMs) {
+function getCountdown(
+  targetDate: Date,
+  nowMs: number
+): { dd: number; hh: number; mm: number; ss: number } {
   const diff = Math.max(0, targetDate.getTime() - nowMs);
   return {
     dd: Math.floor(diff / (1000 * 60 * 60 * 24)),
@@ -195,7 +221,8 @@ function getCountdown(targetDate, nowMs) {
 }
 
 export default function Home() {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState<boolean>(false);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
@@ -204,26 +231,29 @@ export default function Home() {
   }, []);
 
   const weddingDate = useMemo(() => new Date(WEDDING_DATE_ISO), []);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState<number>(Date.now());
+
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
+    const t = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(t);
   }, []);
+
   const { dd, hh, mm, ss } = useMemo(
     () => getCountdown(weddingDate, now),
     [weddingDate, now]
   );
 
-  const [openForm, setOpenForm] = useState(false);
+  const [openForm, setOpenForm] = useState<boolean>(false);
 
-  const [showIntro, setShowIntro] = useState(() => {
+  const [showIntro, setShowIntro] = useState<boolean>(() => {
     try {
       return sessionStorage.getItem("introPlayed") !== "1";
     } catch {
       return true;
     }
   });
-  const [introOpening, setIntroOpening] = useState(false);
+
+  const [introOpening, setIntroOpening] = useState<boolean>(false);
 
   useEffect(() => {
     if (!showIntro) return;
@@ -234,7 +264,9 @@ export default function Home() {
     };
   }, [showIntro]);
 
-  const [selectedDay, setSelectedDay] = useState(CEREMONY_AGENDA[0]?.dayKey ?? "");
+  const [selectedDay, setSelectedDay] = useState<string>(
+    CEREMONY_AGENDA[0]?.dayKey ?? ""
+  );
 
   return (
     <div className="bg-[#f6efe9] text-[#5a4a42] font-sans">
@@ -263,7 +295,11 @@ export default function Home() {
       >
         <nav className="max-w-6xl mx-auto flex justify-between items-center px-6 py-2">
           <a href="#home" className="flex items-center gap-2 no-underline">
-            <img src="/logo.png" alt="Logo mariage" className="h-20 w-auto object-contain" />
+            <img
+              src="/logo.png"
+              alt="Logo mariage"
+              className="h-20 w-auto object-contain"
+            />
             <div className="leading-tight">
               <div
                 className={cn(
@@ -378,7 +414,6 @@ export default function Home() {
             </div>
 
             <div className="rounded-3xl p-8 md:p-6">
-              
               <div className="mt-6 grid grid-cols-4 gap-2">
                 {[
                   { label: "Jours", value: dd, pad: false },
@@ -391,7 +426,7 @@ export default function Home() {
                     className="bg-gradient-to-t from-white/95 via-white/80 to-white/50 border border-[#e6d9cc] rounded-2xl p-4 text-center shadow-sm"
                   >
                     <div className="font-serif text-xl md:text-3xl text-[#4f3f38] leading-none">
-                      {b.pad ? pad2(b.value) : b.value}
+                      {b.pad ? pad2(b.value) : String(b.value)}
                     </div>
                     <div className="text-[10px] uppercase tracking-widest text-[#8c7a70] mt-2">
                       {b.label}
@@ -413,10 +448,13 @@ export default function Home() {
         </div>
       </section>
 
+      {/* AGENDA */}
       <section id="agenda" className="py-28 px-6 max-w-6xl mx-auto">
         <div className="text-center mb-10">
           <h2 className="font-serif text-4xl mb-3">Agenda des festivités</h2>
-          <p className="text-sm text-[#8c7a70]">3 jours — choisissez un jour pour voir le déroulé.</p>
+          <p className="text-sm text-[#8c7a70]">
+            3 jours — choisissez un jour pour voir le déroulé.
+          </p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-3 mb-12">
@@ -447,7 +485,9 @@ export default function Home() {
           >
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
               <div>
-                <p className="text-xs uppercase tracking-widest text-[#8c7a70]">Programme</p>
+                <p className="text-xs uppercase tracking-widest text-[#8c7a70]">
+                  Programme
+                </p>
                 <h3 className="font-serif text-2xl mt-1">
                   {d.dayLabel} — {d.subtitle}
                 </h3>
@@ -465,7 +505,7 @@ export default function Home() {
 
               <div className="space-y-6">
                 {d.items.map((it, idx) => (
-                  <div key={idx} className="flex items-start gap-6">
+                  <div key={`${it.time}-${idx}`} className="flex items-start gap-6">
                     <div className="w-[70px] text-right text-sm font-medium text-[#5a4a42] pt-1">
                       {it.time}
                     </div>
@@ -483,7 +523,9 @@ export default function Home() {
                           {d.dayLabel}
                         </span>
                       </div>
-                      <p className="text-sm text-[#8c7a70] mt-2 leading-relaxed">{it.details}</p>
+                      <p className="text-sm text-[#8c7a70] mt-2 leading-relaxed">
+                        {it.details}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -508,13 +550,16 @@ export default function Home() {
         ))}
       </section>
 
+      {/* ACTIVITIES */}
       <section id="activities" className="py-28 px-6 bg-[#fffaf5]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="font-serif text-4xl text-center mb-6">Activités &amp; temps libres</h2>
+          <h2 className="font-serif text-4xl text-center mb-6">
+            Activités &amp; temps libres
+          </h2>
 
           <p className="text-center text-[#8c7a70] max-w-2xl mx-auto mb-10">
-            Faites défiler pour découvrir les incontournables, puis sélectionnez vos activités pour qu’on
-            organise la semaine au mieux.
+            Faites défiler pour découvrir les incontournables, puis sélectionnez vos activités
+            pour qu’on organise la semaine au mieux.
           </p>
 
           <ActivitiesScroller activities={ACTIVITIES} />
@@ -526,16 +571,20 @@ export default function Home() {
             >
               Choisir mes activités
             </button>
-            <p className="text-xs text-[#8c7a70] mt-3">Vous pourrez modifier vos choix plus tard si besoin.</p>
+            <p className="text-xs text-[#8c7a70] mt-3">
+              Vous pourrez modifier vos choix plus tard si besoin.
+            </p>
           </div>
         </div>
       </section>
 
+      {/* INFOS */}
       <section id="infos" className="py-28 px-6 max-w-6xl mx-auto">
         <h2 className="font-serif text-4xl text-center mb-14">Infos pratiques</h2>
         <InfosPratiques />
       </section>
 
+      {/* FORM */}
       {openForm && (
         <div
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-6"
@@ -560,11 +609,16 @@ export default function Home() {
 
                   {Object.entries(periods).map(([period, acts]) => (
                     <div key={period} className="mb-6">
-                      <p className="text-sm uppercase tracking-wider text-[#8c7a70] mb-3">{period}</p>
+                      <p className="text-sm uppercase tracking-wider text-[#8c7a70] mb-3">
+                        {period}
+                      </p>
 
                       <div className="flex flex-wrap gap-4">
                         {acts.map((act) => (
-                          <label key={act} className="flex items-center gap-2 text-sm text-[#5a4a42]">
+                          <label
+                            key={`${day}-${period}-${act}`}
+                            className="flex items-center gap-2 text-sm text-[#5a4a42]"
+                          >
                             <input
                               type="checkbox"
                               className="accent-[#d6b88c]"
@@ -599,11 +653,21 @@ export default function Home() {
   );
 }
 
-function EnvelopeIntro({ logoSrc, opening, onOpen, onDone }) {
+function EnvelopeIntro({
+  logoSrc,
+  opening,
+  onOpen,
+  onDone,
+}: {
+  logoSrc: string;
+  opening: boolean;
+  onOpen?: () => void;
+  onDone?: () => void;
+}) {
   useEffect(() => {
     if (!opening) return;
-    const t = setTimeout(() => onDone?.(), 650);
-    return () => clearTimeout(t);
+    const t = window.setTimeout(() => onDone?.(), 650);
+    return () => window.clearTimeout(t);
   }, [opening, onDone]);
 
   return (
@@ -611,7 +675,7 @@ function EnvelopeIntro({ logoSrc, opening, onOpen, onDone }) {
       className={cn(
         "fixed inset-0 z-[9999] flex items-center justify-center p-6",
         "bg-white",
-        opening && "intro-fade"
+        opening ? "intro-fade" : undefined
       )}
       aria-label="Intro"
     >
@@ -634,7 +698,12 @@ function EnvelopeIntro({ logoSrc, opening, onOpen, onDone }) {
           <span className="seal-wax" aria-hidden>
             <img src="/cachet.png" alt="" className="seal-wax-img" draggable={false} />
             <span className="seal-logo">
-              <img src={logoSrc} alt="Logo" className="w-full h-full object-contain" draggable={false} />
+              <img
+                src={logoSrc}
+                alt="Logo"
+                className="w-full h-full object-contain"
+                draggable={false}
+              />
             </span>
           </span>
         </button>
@@ -686,7 +755,6 @@ function EnvelopeIntro({ logoSrc, opening, onOpen, onDone }) {
           border-radius:999px;
         }
 
-      
         .intro-fade{ animation: overlayFade 650ms ease forwards; }
         .intro-fade .seal-btn{ animation: sealPop 350ms ease forwards; }
         @keyframes overlayFade { to { opacity: 0; pointer-events:none; } }
@@ -702,9 +770,18 @@ function EnvelopeIntro({ logoSrc, opening, onOpen, onDone }) {
 }
 
 function InfosPratiques() {
-  const [activeId, setActiveId] = useState(null);
+  type InfoBlock = { label: string; lines: string[] };
+  type InfoCard = {
+    id: string;
+    icon: string;
+    title: string;
+    subtitle: string;
+    blocks: InfoBlock[];
+  };
 
-  const cards = [
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const cards: InfoCard[] = [
     {
       id: "arrival",
       icon: "✈️",
@@ -856,7 +933,7 @@ function InfosPratiques() {
                 </div>
                 <ul className="space-y-2 text-sm text-[#6f5f57] leading-relaxed">
                   {b.lines.map((line, idx) => (
-                    <li key={idx} className="flex gap-2">
+                    <li key={`${b.label}-${idx}`} className="flex gap-2">
                       <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[#d6b88c]" />
                       <span>{line}</span>
                     </li>
@@ -878,15 +955,16 @@ function InfosPratiques() {
   );
 }
 
-function ActivitiesScroller({ activities }) {
-  const scrollerRef = useRef(null);
+function ActivitiesScroller({ activities }: { activities: Activity[] }) {
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollByCards = (dir) => {
+  const scrollByCards = (dir: number) => {
     const el = scrollerRef.current;
     if (!el) return;
 
-    const card = el.querySelector("[data-card]");
+    const card = el.querySelector<HTMLElement>("[data-card]");
     const step = card ? card.offsetWidth + 24 : 360;
+
     el.scrollBy({ left: dir * step, behavior: "smooth" });
   };
 
@@ -922,10 +1000,11 @@ function ActivitiesScroller({ activities }) {
         <div
           ref={scrollerRef}
           className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2"
-          style={{ scrollbarWidth: "none" }}
+          style={{ scrollbarWidth: "none" as const }}
         >
           <style>{`
-            [data-scroller]::-webkit-scrollbar { display: none; }
+            /* Webkit scrollbar hiding */
+            .hide-scrollbar::-webkit-scrollbar { display: none; }
           `}</style>
 
           {activities.map((a) => (
