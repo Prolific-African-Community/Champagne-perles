@@ -994,8 +994,8 @@ function ActivitiesScroller({ activities }: { activities: Activity[] }) {
       </div>
 
       <div className="relative">
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#fffaf5] to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#fffaf5] to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-2 bg-gradient-to-r from-[#fffaf5]/20 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-2 bg-gradient-to-l from-[#fffaf5]/20 to-transparent z-10" />
 
         <div
           ref={scrollerRef}
