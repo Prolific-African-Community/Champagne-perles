@@ -362,7 +362,7 @@ export default function Home() {
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-white/15 to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/0" />
 
         <div className="absolute -top-10 -left-10 w-72 h-72 bg-white/15 blur-3xl rounded-full animate-pulse" />
         <div className="absolute top-24 right-10 w-80 h-80 bg-[#d6b88c]/10 blur-3xl rounded-full animate-pulse" />
