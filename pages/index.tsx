@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const cn = (...classes) => classes.filter(Boolean).join(" ");
+const cn = (...classes: unknown[]) => classes.filter(Boolean).join(" ");
 
 const WEDDING_DATE_ISO = "2027-01-02T16:00:00+01:00";
 
