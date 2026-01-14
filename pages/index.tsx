@@ -681,7 +681,8 @@ function EnvelopeIntro({
     >
       <div className="absolute inset-0 pointer-events-none intro-paper" />
 
-      <div className="w-full relative mx-auto">
+      <div className="relative w-[94vw] max-w-[700px] sm:max-w-[980px] md:max-w-[1240px] mx-auto">
+
 
         <img
           src="/enveloppe.png"
