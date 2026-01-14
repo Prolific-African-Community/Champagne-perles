@@ -681,13 +681,14 @@ function EnvelopeIntro({
     >
       <div className="absolute inset-0 pointer-events-none intro-paper" />
 
-      <div className="relative w-[680px] sm:w-[860px] md:w-[1040px] lg:w-[1180px] max-w-[94vw]">
-        <img
-          src="/enveloppe.png"
-          alt="Enveloppe"
-          className="w-full h-auto select-none pointer-events-none drop-shadow-[0_30px_60px_rgba(0,0,0,0.18)]"
-          draggable={false}
-        />
+      <div className="relative w-[92vw] max-w-[520px] sm:max-w-[760px] md:max-w-[980px] mx-auto">
+      <img
+  src="/enveloppe.png"
+  alt="Enveloppe"
+  className="w-full max-h-[62svh] h-auto object-contain select-none pointer-events-none drop-shadow-[0_30px_60px_rgba(0,0,0,0.18)]"
+  draggable={false}
+/>
+
 
         <button
           type="button"
@@ -734,8 +735,8 @@ function EnvelopeIntro({
         .seal-wax{
           position:relative;
           display:block;
-          width:200px;
-          height:200px;
+          width: clamp(110px, 22vw, 190px);
+          height: clamp(110px, 22vw, 190px);
           border-radius:999px;
           overflow:hidden;
           box-shadow: 0 18px 30px rgba(0,0,0,.22);
