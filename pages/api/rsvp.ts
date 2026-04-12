@@ -14,20 +14,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const body = req.body as Body;
 
-    const fullName = (body.fullName || "").trim();
+    const fullName = (body.fullName ?? "").trim();
     const attending = body.attending;
     const guests = Number(body.guests ?? 1);
-    const note = (body.note || "").trim();
+    const note = (body.note ?? "").trim();
 
     if (!fullName) return res.status(400).json({ message: "Missing fullName" });
-    if (attending !== "yes" && attending !== "no")
+    if (attending !== "yes" && attending !== "no") {
       return res.status(400).json({ message: "Invalid attending value" });
+    }
 
     const attendingBool = attending === "yes";
     const guestsFinal = attendingBool ? Math.max(1, guests) : 0;
 
+    // IMPORTANT: colonne = full_name (pas fullName)
     await sql`
-      INSERT INTO rsvps (full_name, attending, guests, note)
+      INSERT INTO public.rsvps (full_name, attending, guests, note)
       VALUES (${fullName}, ${attendingBool}, ${guestsFinal}, ${note})
     `;
 
