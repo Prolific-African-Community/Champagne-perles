@@ -2,14 +2,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createPool } from "@vercel/postgres";
 
-/**
- * Uses a pooled connection string (recommended on Vercel).
- * Put your pooled URL in RSVP_POSTGRES_URL (as you already have).
- *
- * If later you prefer non-pooled, you can set RSVP_POSTGRES_URL_NON_POOLING
- * and the code will use it instead.
- */
-
 type RSVPBody = {
   fullName?: string;
   attending?: "yes" | "no";
@@ -17,22 +9,23 @@ type RSVPBody = {
   note?: string;
 };
 
-// Prefer non-pooled if you have it, otherwise use pooled.
-const CONNECTION_STRING =
-  process.env.RSVP_POSTGRES_URL_NON_POOLING || process.env.RSVP_POSTGRES_URL || "";
-
-// For pooled URLs, createPool is correct.
-// (It also works fine with non-pooled URLs.)
-const pool = createPool({ connectionString: CONNECTION_STRING });
+function getConnString() {
+  return (
+    process.env.RSVP_POSTGRES_URL_NON_POOLING ||
+    process.env.RSVP_POSTGRES_URL ||
+    ""
+  );
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Healthcheck / deployment verification
+  const connectionString = getConnString();
+
+  // Healthcheck: /api/rsvp
   if (req.method === "GET") {
     return res.status(200).json({
       ok: true,
-      handler: "rsvp",
-      mode: process.env.RSVP_POSTGRES_URL_NON_POOLING ? "non_pooling" : "pooling",
-      hasConnectionString: Boolean(CONNECTION_STRING),
+      hasConn: Boolean(connectionString),
+      using: process.env.RSVP_POSTGRES_URL_NON_POOLING ? "non_pooling" : "pooling",
     });
   }
 
@@ -40,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  if (!CONNECTION_STRING) {
+  if (!connectionString) {
     return res.status(500).json({
       message: "DB insert failed",
       error: "Missing RSVP_POSTGRES_URL (or RSVP_POSTGRES_URL_NON_POOLING) env var",
@@ -62,6 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const attendingBool = attending === "yes";
     const guestsFinal = attendingBool ? Math.max(1, Number.isFinite(guestsRaw) ? guestsRaw : 1) : 0;
+
+    const pool = createPool({ connectionString });
 
     await pool.sql`
       INSERT INTO public.rsvps (full_name, attending, guests, note)
