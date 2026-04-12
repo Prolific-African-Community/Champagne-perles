@@ -9,6 +9,7 @@
     "@emotion/react": "latest",
     "@emotion/styled": "latest",
     "@mui/material": "latest",
+    "@vercel/postgres": "^0.10.0",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"
