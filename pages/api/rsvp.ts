@@ -9,7 +9,11 @@ type RSVPBody = {
   note?: string;
 };
 
-function parseBody(body: RSVPBody) {
+function normalizeName(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function validate(body: RSVPBody) {
   const fullName = (body.fullName ?? "").trim();
   const attending = body.attending;
   const guestsRaw = Number(body.guests ?? 1);
@@ -26,17 +30,36 @@ function parseBody(body: RSVPBody) {
   return {
     ok: true as const,
     fullName,
+    fullNameNorm: normalizeName(fullName),
     attendingBool,
     guestsFinal,
     note: note || null,
   };
 }
 
+async function upsertRSVP(
+  sqlRunner: <T = any>(strings: TemplateStringsArray, ...values: any[]) => Promise<{ rows: T[] }>,
+  data: { fullName: string; fullNameNorm: string; attendingBool: boolean; guestsFinal: number; note: string | null }
+) {
+  const result = await sqlRunner<{ inserted: boolean }>`
+    INSERT INTO public.rsvps (full_name, full_name_norm, attending, guests, note, updated_at)
+    VALUES (${data.fullName}, ${data.fullNameNorm}, ${data.attendingBool}, ${data.guestsFinal}, ${data.note}, now())
+    ON CONFLICT (full_name_norm)
+    DO UPDATE SET
+      full_name = EXCLUDED.full_name,
+      attending = EXCLUDED.attending,
+      guests = EXCLUDED.guests,
+      note = EXCLUDED.note,
+      updated_at = now()
+    RETURNING (xmax = 0) AS inserted
+  `;
+  return result.rows[0]?.inserted ? "created" : "updated";
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const nonPooling = process.env.RSVP_POSTGRES_URL_NON_POOLING || "";
   const pooled = process.env.RSVP_POSTGRES_URL || "";
 
-  // Healthcheck
   if (req.method === "GET") {
     return res.status(200).json({
       ok: true,
@@ -46,49 +69,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
+  if (!nonPooling && !pooled) {
+    return res.status(500).json({ message: "DB insert failed", error: "Missing RSVP_POSTGRES_URL or RSVP_POSTGRES_URL_NON_POOLING" });
   }
 
-  if (!nonPooling && !pooled) {
-    return res.status(500).json({
-      message: "DB insert failed",
-      error: "Missing RSVP_POSTGRES_URL or RSVP_POSTGRES_URL_NON_POOLING",
-    });
-  }
+  const parsed = validate(req.body as RSVPBody);
+  if (!parsed.ok) return res.status(parsed.status).json({ message: parsed.message });
 
   try {
-    const parsed = parseBody(req.body as RSVPBody);
-    if (!parsed.ok) return res.status(parsed.status).json({ message: parsed.message });
-
-    // Prefer NON_POOLING with createClient (direct connection)
+    // Direct connection (NON_POOLING)
     if (nonPooling) {
       const client = createClient({ connectionString: nonPooling });
       try {
         await client.connect();
-        await client.sql`
-          INSERT INTO public.rsvps (full_name, attending, guests, note)
-          VALUES (${parsed.fullName}, ${parsed.attendingBool}, ${parsed.guestsFinal}, ${parsed.note})
-        `;
+        const action = await upsertRSVP(client.sql.bind(client), parsed);
+        return res.status(200).json({ ok: true, action });
       } finally {
         await client.end().catch(() => null);
       }
-
-      return res.status(200).json({ ok: true });
     }
 
-    // Otherwise use pooled URL with createPool
+    // Pooled connection
     const pool = createPool({ connectionString: pooled });
-    await pool.sql`
-      INSERT INTO public.rsvps (full_name, attending, guests, note)
-      VALUES (${parsed.fullName}, ${parsed.attendingBool}, ${parsed.guestsFinal}, ${parsed.note})
-    `;
-
-    return res.status(200).json({ ok: true });
+    const action = await upsertRSVP(pool.sql.bind(pool), parsed);
+    return res.status(200).json({ ok: true, action });
   } catch (e: any) {
-    return res.status(500).json({
-      message: "DB insert failed",
-      error: e?.message || "Unknown",
-    });
+    return res.status(500).json({ message: "DB insert failed", error: e?.message || "Unknown" });
   }
 }
