@@ -1,7 +1,8 @@
+// pages/api/rsvp.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { sql } from "@vercel/postgres";
+import { createClient } from "@vercel/postgres";
 
-type Body = {
+type RSVPBody = {
   fullName?: string;
   attending?: "yes" | "no";
   guests?: number;
@@ -9,14 +10,23 @@ type Body = {
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
+
+  const connectionString = process.env.RSVP_POSTGRES_URL;
+  if (!connectionString) {
+    return res.status(500).json({
+      message: "Missing RSVP_POSTGRES_URL env var",
+    });
+  }
 
   try {
-    const body = req.body as Body;
+    const body = req.body as RSVPBody;
 
     const fullName = (body.fullName ?? "").trim();
     const attending = body.attending;
-    const guests = Number(body.guests ?? 1);
+    const guestsRaw = Number(body.guests ?? 1);
     const note = (body.note ?? "").trim();
 
     if (!fullName) return res.status(400).json({ message: "Missing fullName" });
@@ -25,15 +35,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const attendingBool = attending === "yes";
-    const guestsFinal = attendingBool ? Math.max(1, guests) : 0;
+    const guestsFinal = attendingBool ? Math.max(1, guestsRaw || 1) : 0;
 
-    // IMPORTANT: colonne = full_name (pas fullName)
-    await sql`
-      INSERT INTO public.rsvps (full_name, attending, guests, note)
-      VALUES (${fullName}, ${attendingBool}, ${guestsFinal}, ${note})
-    `;
+    const client = createClient({ connectionString });
 
-    return res.status(200).json({ ok: true });
+    try {
+      await client.connect();
+
+      await client.sql`
+        INSERT INTO public.rsvps (full_name, attending, guests, note)
+        VALUES (${fullName}, ${attendingBool}, ${guestsFinal}, ${note || null})
+      `;
+
+      return res.status(200).json({ ok: true });
+    } finally {
+      // Ensure connection is closed even if insert fails
+      await client.end().catch(() => null);
+    }
   } catch (e: any) {
     console.error("RSVP_ERROR:", e);
     return res.status(500).json({
