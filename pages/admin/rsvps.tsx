@@ -1,3 +1,4 @@
+// pages/admin/rsvps.tsx
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import { createClient, createPool } from "@vercel/postgres";
@@ -46,14 +47,7 @@ export default function AdminRSVPPage(props: Props) {
   }, [q, props.rows]);
 
   const downloadCSV = () => {
-    const header = [
-      "created_at",
-      "updated_at",
-      "full_name",
-      "attending",
-      "guests",
-      "note",
-    ];
+    const header = ["created_at", "updated_at", "full_name", "attending", "guests", "note"];
 
     const escape = (v: unknown) => {
       const s = String(v ?? "");
@@ -155,9 +149,7 @@ export default function AdminRSVPPage(props: Props) {
                         </span>
                       </td>
                       <td className="px-5 py-4">{r.guests}</td>
-                      <td className="px-5 py-4 text-[#6f5f57]">
-                        {r.note || "-"}
-                      </td>
+                      <td className="px-5 py-4 text-[#6f5f57]">{r.note || "-"}</td>
                       <td className="px-5 py-4 text-xs text-[#8c7a70] whitespace-nowrap">
                         {new Date(r.updated_at || r.created_at).toLocaleString()}
                       </td>
@@ -166,10 +158,7 @@ export default function AdminRSVPPage(props: Props) {
 
                   {filtered.length === 0 && (
                     <tr>
-                      <td
-                        colSpan={5}
-                        className="px-5 py-10 text-center text-[#8c7a70]"
-                      >
+                      <td colSpan={5} className="px-5 py-10 text-center text-[#8c7a70]">
                         Aucun résultat.
                       </td>
                     </tr>
@@ -180,8 +169,8 @@ export default function AdminRSVPPage(props: Props) {
           </div>
 
           <div className="text-xs text-[#8c7a70] mt-4">
-            Astuce: garde ce lien privé. Tu peux aussi changer le mot de passe via
-            la variable d’environnement <span className="font-mono">ADMIN_PASSWORD</span>.
+            Astuce: garde ce lien privé. Tu peux aussi changer le mot de passe via la variable
+            d’environnement <span className="font-mono">ADMIN_PASSWORD</span>.
           </div>
         </div>
       </div>
@@ -200,26 +189,26 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const nonPooling = process.env.RSVP_POSTGRES_URL_NON_POOLING || "";
   const pooled = process.env.RSVP_POSTGRES_URL || "";
 
-  const query = `
-    SELECT created_at, updated_at, full_name, attending, guests, note
-    FROM public.rsvps
-    ORDER BY updated_at DESC
-  `;
-
-  // Prefer direct connection if present
   if (nonPooling) {
     const client = createClient({ connectionString: nonPooling });
     try {
       await client.connect();
-      const result = await client.sql<RSVPRow>(query);
+      const result = await client.sql<RSVPRow>`
+        SELECT created_at, updated_at, full_name, attending, guests, note
+        FROM public.rsvps
+        ORDER BY updated_at DESC
+      `;
       return { props: { authorized: true, rows: result.rows } };
     } finally {
       await client.end().catch(() => null);
     }
   }
 
-  // Else pooled
   const pool = createPool({ connectionString: pooled });
-  const result = await pool.sql<RSVPRow>(query);
+  const result = await pool.sql<RSVPRow>`
+    SELECT created_at, updated_at, full_name, attending, guests, note
+    FROM public.rsvps
+    ORDER BY updated_at DESC
+  `;
   return { props: { authorized: true, rows: result.rows } };
 };
