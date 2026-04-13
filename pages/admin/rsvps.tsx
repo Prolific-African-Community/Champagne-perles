@@ -8,9 +8,9 @@ type RSVPRow = {
   created_at: string;
   updated_at: string;
   full_name: string;
-  attending: boolean;
+  plus_one_name: string | null;
+  children_count: number;
   guests: number;
-  note: string | null;
 };
 
 type Props =
@@ -46,8 +46,22 @@ export default function AdminRSVPPage(props: Props) {
     return props.rows.filter((r) => r.full_name.toLowerCase().includes(needle));
   }, [q, props.rows]);
 
+  const totals = useMemo(() => {
+    const guestsTotal = filtered.reduce((acc, r) => acc + (r.guests || 0), 0);
+    const childrenTotal = filtered.reduce((acc, r) => acc + (r.children_count || 0), 0);
+    const plusOneCount = filtered.reduce((acc, r) => acc + (r.plus_one_name ? 1 : 0), 0);
+    return { guestsTotal, childrenTotal, plusOneCount };
+  }, [filtered]);
+
   const downloadCSV = () => {
-    const header = ["created_at", "updated_at", "full_name", "attending", "guests", "note"];
+    const header = [
+      "created_at",
+      "updated_at",
+      "full_name",
+      "plus_one_name",
+      "children_count",
+      "guests",
+    ];
 
     const escape = (v: unknown) => {
       const s = String(v ?? "");
@@ -62,9 +76,9 @@ export default function AdminRSVPPage(props: Props) {
           r.created_at,
           r.updated_at,
           r.full_name,
-          r.attending ? "yes" : "no",
-          r.guests,
-          r.note ?? "",
+          r.plus_one_name ?? "",
+          r.children_count ?? 0,
+          r.guests ?? 0,
         ]
           .map(escape)
           .join(",")
@@ -95,6 +109,18 @@ export default function AdminRSVPPage(props: Props) {
               <p className="text-sm text-[#8c7a70] mt-1">
                 {filtered.length} réponse(s) (filtrées) / {props.rows.length} total
               </p>
+
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                <span className="px-3 py-1 rounded-full bg-white/70 border border-[#e6d9cc]">
+                  Total invités: <span className="font-semibold">{totals.guestsTotal}</span>
+                </span>
+                <span className="px-3 py-1 rounded-full bg-white/70 border border-[#e6d9cc]">
+                  +1: <span className="font-semibold">{totals.plusOneCount}</span>
+                </span>
+                <span className="px-3 py-1 rounded-full bg-white/70 border border-[#e6d9cc]">
+                  Enfants: <span className="font-semibold">{totals.childrenTotal}</span>
+                </span>
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -119,9 +145,9 @@ export default function AdminRSVPPage(props: Props) {
                 <thead className="bg-[#fffaf5] border-b border-[#e6d9cc]">
                   <tr className="text-left">
                     <th className="px-5 py-4">Nom</th>
-                    <th className="px-5 py-4">Présence</th>
-                    <th className="px-5 py-4">Nb</th>
-                    <th className="px-5 py-4">Note</th>
+                    <th className="px-5 py-4">+1</th>
+                    <th className="px-5 py-4">Enfants</th>
+                    <th className="px-5 py-4">Total</th>
                     <th className="px-5 py-4">MAJ</th>
                   </tr>
                 </thead>
@@ -136,20 +162,11 @@ export default function AdminRSVPPage(props: Props) {
                       )}
                     >
                       <td className="px-5 py-4 font-medium">{r.full_name}</td>
-                      <td className="px-5 py-4">
-                        <span
-                          className={cn(
-                            "px-3 py-1 rounded-full border text-xs font-semibold",
-                            r.attending
-                              ? "bg-green-50 border-green-200 text-green-700"
-                              : "bg-red-50 border-red-200 text-red-700"
-                          )}
-                        >
-                          {r.attending ? "Oui" : "Non"}
-                        </span>
+                      <td className="px-5 py-4 text-[#6f5f57]">
+                        {r.plus_one_name ? r.plus_one_name : "-"}
                       </td>
-                      <td className="px-5 py-4">{r.guests}</td>
-                      <td className="px-5 py-4 text-[#6f5f57]">{r.note || "-"}</td>
+                      <td className="px-5 py-4">{r.children_count ?? 0}</td>
+                      <td className="px-5 py-4 font-semibold">{r.guests ?? 0}</td>
                       <td className="px-5 py-4 text-xs text-[#8c7a70] whitespace-nowrap">
                         {new Date(r.updated_at || r.created_at).toLocaleString()}
                       </td>
@@ -169,8 +186,8 @@ export default function AdminRSVPPage(props: Props) {
           </div>
 
           <div className="text-xs text-[#8c7a70] mt-4">
-            Astuce: garde ce lien privé. Tu peux aussi changer le mot de passe via la variable
-            d’environnement <span className="font-mono">ADMIN_PASSWORD</span>.
+            Astuce: garde ce lien privé. Tu peux changer le mot de passe via{" "}
+            <span className="font-mono">ADMIN_PASSWORD</span>.
           </div>
         </div>
       </div>
@@ -194,7 +211,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     try {
       await client.connect();
       const result = await client.sql<RSVPRow>`
-        SELECT created_at, updated_at, full_name, attending, guests, note
+        SELECT created_at, updated_at, full_name, plus_one_name, children_count, guests
         FROM public.rsvps
         ORDER BY updated_at DESC
       `;
@@ -206,7 +223,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
   const pool = createPool({ connectionString: pooled });
   const result = await pool.sql<RSVPRow>`
-    SELECT created_at, updated_at, full_name, attending, guests, note
+    SELECT created_at, updated_at, full_name, plus_one_name, children_count, guests
     FROM public.rsvps
     ORDER BY updated_at DESC
   `;
