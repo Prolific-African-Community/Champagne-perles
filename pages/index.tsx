@@ -475,27 +475,32 @@ export default function Home() {
             setOpenRSVP(false);
             setRsvpError(null);
           }}
-          onSubmit={async (payload) => {
+          onSubmit={async (payload: { fullName: string; plusOneName?: string; childrenCount: number }) => {
             setRsvpLoading(true);
             setRsvpError(null);
-
+      
             try {
               const resp = await fetch("/api/rsvp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+                body: JSON.stringify({
+                  fullName: payload.fullName,
+                  plusOneName: payload.plusOneName,
+                  childrenCount: payload.childrenCount,
+                }),
               });
-
+      
+              const data = await resp.json().catch(() => null);
+      
               if (!resp.ok) {
-                const err = await resp.json().catch(() => null);
-                throw new Error(err?.message || "RSVP failed");
+                throw new Error(data?.error || data?.message || "RSVP failed");
               }
-
+      
               setRsvpSuccess(true);
               try {
                 localStorage.setItem("rsvp_done", "1");
               } catch {}
-
+      
               setTimeout(() => {
                 setOpenRSVP(false);
                 setRsvpSuccess(false);
@@ -508,7 +513,7 @@ export default function Home() {
           }}
         />
       )}
-
+      
       <footer className="text-center text-xs text-[#8c7a70] py-10 border-t">
         © {new Date().getFullYear()} — Mariage au Sénégal
       </footer>
@@ -770,31 +775,34 @@ function RSVPModal({
   success: boolean;
   error: string | null;
   onClose: () => void;
-  onSubmit: (data: RSVPData) => void;
+  onSubmit: (data: { fullName: string; plusOneName?: string; childrenCount: number }) => void;
 }) {
   const [fullName, setFullName] = useState("");
-  const [attending, setAttending] = useState<"yes" | "no">("yes");
-  const [guests, setGuests] = useState(1);
-  const [note, setNote] = useState("");
+  const [plusOneName, setPlusOneName] = useState("");
+  const [childrenCount, setChildrenCount] = useState(0);
 
   const canSubmit = fullName.trim().length >= 2 && !loading;
 
   return (
     <div
       className="fixed inset-0 z-50 bg-black/50 backdrop-blur flex items-center justify-center p-5"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onClick={(e) => e.target === e.currentTarget && !loading && onClose()}
     >
       <div className="w-full max-w-xl rounded-3xl bg-white border border-[#e6d9cc] shadow-2xl overflow-hidden">
         <div className="p-6 md:p-8 flex items-start justify-between gap-4">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.25em] text-[#8c7a70]">Confirmation de présence</div>
+            <div className="text-[11px] uppercase tracking-[0.25em] text-[#8c7a70]">
+              Confirmation
+            </div>
             <h3 className="font-serif text-2xl mt-2 text-[#4f3f38]">RSVP</h3>
-            <p className="text-sm text-[#8c7a70] mt-2">Merci de confirmer votre présence.</p>
+            <p className="text-sm text-[#8c7a70] mt-2">
+              10 secondes et c’est bouclé. (Promis.)
+            </p>
           </div>
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => !loading && onClose()}
             className="w-10 h-10 rounded-full border border-[#e6d9cc] bg-white text-[#5a4a42] hover:border-[#d6b88c] transition"
             aria-label="Fermer"
           >
@@ -807,83 +815,71 @@ function RSVPModal({
           onSubmit={(e) => {
             e.preventDefault();
             if (!canSubmit) return;
+
             onSubmit({
               fullName: fullName.trim(),
-              attending,
-              guests: attending === "yes" ? guests : 0,
-              note: note.trim() ? note.trim() : undefined,
+              plusOneName: plusOneName.trim() ? plusOneName.trim() : undefined,
+              childrenCount,
             });
           }}
         >
           <div>
-            <label className="text-sm font-semibold text-[#5a4a42]">Nom & prénom</label>
+            <label className="text-sm font-semibold text-[#5a4a42]">
+              Nom & prénom <span className="text-[#8c7a70] font-normal">(obligatoire)</span>
+            </label>
             <input
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Ex: Fatou Diop"
               className="mt-2 w-full rounded-2xl border border-[#e6d9cc] bg-white px-4 py-3 outline-none focus:border-[#d6b88c]"
+              disabled={loading}
             />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-semibold text-[#5a4a42]">Présence</label>
-              <div className="mt-2 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAttending("yes")}
-                  className={cn(
-                    "flex-1 rounded-2xl px-4 py-3 border font-semibold transition",
-                    attending === "yes"
-                      ? "bg-[#d6b88c] border-[#d6b88c] text-white"
-                      : "bg-white border-[#e6d9cc] text-[#5a4a42] hover:border-[#d6b88c]"
-                  )}
-                >
-                  Oui
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAttending("no")}
-                  className={cn(
-                    "flex-1 rounded-2xl px-4 py-3 border font-semibold transition",
-                    attending === "no"
-                      ? "bg-[#4f3f38] border-[#4f3f38] text-white"
-                      : "bg-white border-[#e6d9cc] text-[#5a4a42] hover:border-[#4f3f38]"
-                  )}
-                >
-                  Non
-                </button>
-              </div>
-            </div>
-
-            <div className={attending === "no" ? "opacity-40 pointer-events-none" : ""}>
-              <label className="text-sm font-semibold text-[#5a4a42]">Nombre</label>
-              <select
-                value={guests}
-                onChange={(e) => setGuests(Number(e.target.value))}
-                className="mt-2 w-full rounded-2xl border border-[#e6d9cc] bg-white px-4 py-3 outline-none focus:border-[#d6b88c]"
-              >
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <p className="text-xs text-[#8c7a70] mt-2">
+              Juste pour qu’on sache qui accueillir comme une star.
+            </p>
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-[#5a4a42]">Message (optionnel)</label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Allergies, arrivée, questions…"
-              className="mt-2 w-full min-h-[110px] rounded-2xl border border-[#e6d9cc] bg-white px-4 py-3 outline-none focus:border-[#d6b88c]"
+            <label className="text-sm font-semibold text-[#5a4a42]">
+              Nom & prénom du +1 <span className="text-[#8c7a70] font-normal">(si tu viens accompagné·e)</span>
+            </label>
+            <input
+              value={plusOneName}
+              onChange={(e) => setPlusOneName(e.target.value)}
+              placeholder="Ex: Mamadou Ndiaye"
+              className="mt-2 w-full rounded-2xl border border-[#e6d9cc] bg-white px-4 py-3 outline-none focus:border-[#d6b88c]"
+              disabled={loading}
             />
+            <p className="text-xs text-[#8c7a70] mt-2">
+              Si tu ne sais pas encore, mets “à confirmer”.
+            </p>
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold text-[#5a4a42]">
+              Nombre d’enfants <span className="text-[#8c7a70] font-normal">(0 si aucun)</span>
+            </label>
+            <select
+              value={childrenCount}
+              onChange={(e) => setChildrenCount(Number(e.target.value))}
+              className="mt-2 w-full rounded-2xl border border-[#e6d9cc] bg-white px-4 py-3 outline-none focus:border-[#d6b88c]"
+              disabled={loading}
+            >
+              {[0, 1, 2, 3, 4, 5, 6].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-[#8c7a70] mt-2">
+              Pour prévoir les places (et éviter une bataille de chaises).
+            </p>
           </div>
 
           {error && (
-            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-2xl px-4 py-3">{error}</div>
+            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-2xl px-4 py-3">
+              {error}
+            </div>
           )}
 
           {success && (
@@ -898,7 +894,9 @@ function RSVPModal({
               disabled={!canSubmit}
               className={cn(
                 "flex-1 rounded-full px-6 py-4 font-semibold transition",
-                canSubmit ? "bg-[#d6b88c] text-white hover:opacity-90" : "bg-[#d6b88c]/40 text-white cursor-not-allowed"
+                canSubmit
+                  ? "bg-[#d6b88c] text-white hover:opacity-90"
+                  : "bg-[#d6b88c]/40 text-white cursor-not-allowed"
               )}
             >
               {loading ? "Envoi..." : "Confirmer"}
@@ -906,8 +904,9 @@ function RSVPModal({
 
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => !loading && onClose()}
               className="flex-1 rounded-full px-6 py-4 font-semibold border border-[#e6d9cc] bg-white text-[#5a4a42] hover:border-[#d6b88c] transition"
+              disabled={loading}
             >
               Plus tard
             </button>
@@ -917,6 +916,7 @@ function RSVPModal({
     </div>
   );
 }
+
 
 function InfosPratiques() {
   type InfoBlock = { label: string; lines: string[] };
