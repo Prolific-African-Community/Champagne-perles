@@ -372,105 +372,111 @@ export default function Home() {
       </header>
 
       {/* HERO */}
-      <section
-        id="home"
-        className="
-          relative min-h-[100svh] overflow-hidden bg-[#F8F5F0] px-5 pt-[28px]
-          bg-[url('/paper2.png')] bg-cover bg-center bg-no-repeat
-          md:bg-[url('/paper2.png')]
-        "
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(248,245,240,0.46)_0%,rgba(248,245,240,0.22)_42%,rgba(248,245,240,0)_76%)]" />
+<section
+  id="home"
+  className="
+    relative min-h-[100svh] overflow-hidden bg-[#F8F5F0] px-5 pt-[96px] sm:pt-[28px]
+    bg-[url('/paper2.png')] bg-cover bg-center bg-no-repeat
+    md:bg-[url('/paper2.png')]
+  "
+>
+  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(248,245,240,0.46)_0%,rgba(248,245,240,0.22)_42%,rgba(248,245,240,0)_76%)]" />
 
-        <div className="relative mx-auto flex min-h-[calc(100svh-78px)] max-w-6xl items-center justify-center">
-          <div className="mx-auto w-full max-w-[820px] translate-y-[-2px] text-center sm:translate-y-[-10px]">
-            <img
-              src="/crest2.png"
-              alt="Monogramme Jonathan & Manon"
-              className="mx-auto mb-0 h-auto w-[235px] select-none object-contain sm:w-[170px] md:w-[255px] lg:w-[325px]"
-            />
+  <div className="relative mx-auto flex min-h-[calc(100svh-96px)] max-w-6xl items-center justify-center sm:min-h-[calc(100svh-78px)]">
+    <div className="mx-auto w-full max-w-[820px] translate-y-[-2px] text-center sm:translate-y-[-10px]">
+      {/* Crest */}
+      <img
+        src="/crest2.png"
+        alt="Monogramme Jonathan & Manon"
+        className="mx-auto mb-9 h-auto w-[220px] select-none object-contain sm:mb-0 sm:w-[170px] md:w-[255px] lg:w-[325px]"
+      />
 
-            <h1 className="font-serif text-[24px] font-normal uppercase leading-[1.08] tracking-[0.24em] text-[#2E2A27] sm:text-[36px] md:text-[56px] lg:text-[54px]">
-              Jonathan <span className="tracking-[0.12em]">&amp;</span> Manon
-            </h1>
+      {/* Names */}
+      <h1 className="font-serif text-[24px] font-normal uppercase leading-[1.12] tracking-[0.24em] text-[#2E2A27] sm:text-[36px] md:text-[56px] lg:text-[54px]">
+        Jonathan <span className="tracking-[0.12em]">&amp;</span> Manon
+      </h1>
 
-            <p className="mt-4 text-[8px] uppercase tracking-[0.38em] text-[#9C8F84] sm:text-[12px]">
-              vous invitent à célébrer leur mariage
-            </p>
+      <p className="mt-6 text-[8px] uppercase tracking-[0.38em] text-[#9C8F84] sm:mt-4 sm:text-[12px]">
+        vous invitent à célébrer leur mariage
+      </p>
 
-            <div className="mx-auto mt-7 grid w-[230px] grid-cols-[1fr_auto_1fr] items-center gap-7">
-              <span className="h-px bg-[#CDBBA3]/80" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#CDBBA3]" />
-              <span className="h-px bg-[#CDBBA3]/80" />
+      {/* Separator */}
+      <div className="mx-auto mt-10 grid w-[230px] grid-cols-[1fr_auto_1fr] items-center gap-7 sm:mt-7">
+        <span className="h-px bg-[#CDBBA3]/80" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#CDBBA3]" />
+        <span className="h-px bg-[#CDBBA3]/80" />
+      </div>
+
+      {/* Details */}
+      <div className="mt-10 space-y-6 sm:mt-7 sm:space-y-4">
+        <p className="text-[9px] uppercase tracking-[0.34em] text-[#4A433E] sm:text-[13px]">
+          Du 31 décembre 2026 au 2 janvier 2027
+        </p>
+
+        <div>
+          <p className="font-serif text-[18px] uppercase tracking-[0.22em] text-[#2E2A27] sm:text-[23px] md:text-[25px]">
+            Hôtel Keparanga
+          </p>
+          <p className="mt-3 text-[10px] uppercase tracking-[0.40em] text-[#6B635D] sm:mt-2 sm:text-[12px]">
+            Saly, Sénégal
+          </p>
+        </div>
+
+        <div className="flex justify-center">
+          <span className="text-[11px] text-[#CDBBA3]">✦</span>
+        </div>
+
+        <p className="mx-auto max-w-[760px] text-[10px] uppercase leading-relaxed tracking-[0.31em] text-[#9C8F84] sm:text-[12px]">
+          3 jours de fête, de soleil et de moments inoubliables
+        </p>
+      </div>
+
+      {/* CTAs */}
+      <div className="mx-auto mt-12 flex w-full max-w-[650px] flex-col items-center justify-center gap-4 sm:mt-9 sm:flex-row sm:gap-3">
+        <a
+          href="#agenda"
+          className="inline-flex h-12 w-full items-center justify-center rounded-[8px] bg-[#BFA98E] px-8 text-[11px] uppercase tracking-[0.30em] text-white no-underline shadow-[0_18px_34px_rgba(85,65,48,0.13)] transition hover:opacity-90 sm:w-auto"
+        >
+          Découvrir le programme
+          <span className="ml-3 h-1.5 w-1.5 rounded-full bg-white/80" />
+        </a>
+
+        <button
+          onClick={() => setOpenRSVP(true)}
+          className="inline-flex h-12 w-full items-center justify-center rounded-[8px] border border-[#CDBBA3] bg-[#FBF8F4]/70 px-8 text-[11px] uppercase tracking-[0.30em] text-[#4A433E] backdrop-blur-sm transition hover:bg-white/70 sm:w-auto"
+        >
+          Confirmer ma présence
+          <span className="ml-3 h-1.5 w-1.5 rounded-full bg-[#CDBBA3]" />
+        </button>
+      </div>
+
+      {/* Countdown */}
+      <div className="mx-auto mt-12 grid w-full max-w-[470px] grid-cols-4 items-center sm:mt-9">
+        {[
+          { label: "Jours", value: dd, pad: false },
+          { label: "Heures", value: hh, pad: true },
+          { label: "Minutes", value: mm, pad: true },
+          { label: "Secondes", value: ss, pad: true },
+        ].map((item, idx) => (
+          <div
+            key={item.label}
+            className={cn(
+              "text-center",
+              idx !== 0 && "border-l border-[#CDBBA3]/60"
+            )}
+          >
+            <div className="font-serif text-[22px] leading-none text-[#2E2A27] sm:text-[27px]">
+              {item.pad ? pad2(item.value) : String(item.value)}
             </div>
-
-            <div className="mt-7 space-y-4">
-              <p className="text-[9px] uppercase tracking-[0.34em] text-[#4A433E] sm:text-[13px]">
-                Du 31 décembre 2026 au 2 janvier 2027
-              </p>
-
-              <div>
-                <p className="font-serif text-[18px] uppercase tracking-[0.22em] text-[#2E2A27] sm:text-[23px] md:text-[25px]">
-                  Hôtel Keparanga
-                </p>
-                <p className="mt-2 text-[10px] uppercase tracking-[0.40em] text-[#6B635D] sm:text-[12px]">
-                  Saly, Sénégal
-                </p>
-              </div>
-
-              <div className="flex justify-center">
-                <span className="text-[11px] text-[#CDBBA3]">✦</span>
-              </div>
-
-              <p className="mx-auto max-w-[760px] text-[10px] uppercase tracking-[0.31em] text-[#9C8F84] sm:text-[12px]">
-                3 jours de fête, de soleil et de moments inoubliables
-              </p>
-            </div>
-
-            <div className="mx-auto mt-9 flex w-full max-w-[650px] flex-col items-center justify-center gap-3 sm:flex-row">
-              <a
-                href="#agenda"
-                className="inline-flex h-12 w-full items-center justify-center rounded-[8px] bg-[#BFA98E] px-8 text-[11px] uppercase tracking-[0.30em] text-white no-underline shadow-[0_18px_34px_rgba(85,65,48,0.13)] transition hover:opacity-90 sm:w-auto"
-              >
-                Découvrir le programme
-                <span className="ml-3 h-1.5 w-1.5 rounded-full bg-white/80" />
-              </a>
-
-              <button
-                onClick={() => setOpenRSVP(true)}
-                className="inline-flex h-12 w-full items-center justify-center rounded-[8px] border border-[#CDBBA3] bg-[#FBF8F4]/70 px-8 text-[11px] uppercase tracking-[0.30em] text-[#4A433E] backdrop-blur-sm transition hover:bg-white/70 sm:w-auto"
-              >
-                Confirmer ma présence
-                <span className="ml-3 h-1.5 w-1.5 rounded-full bg-[#FBF8F4]/70" />
-              </button>
-            </div>
-
-            <div className="mx-auto mt-9 grid w-full max-w-[470px] grid-cols-4 items-center">
-              {[
-                { label: "Jours", value: dd, pad: false },
-                { label: "Heures", value: hh, pad: true },
-                { label: "Minutes", value: mm, pad: true },
-                { label: "Secondes", value: ss, pad: true },
-              ].map((item, idx) => (
-                <div
-                  key={item.label}
-                  className={cn(
-                    "text-center",
-                    idx !== 0 && "border-l border-[#CDBBA3]/60"
-                  )}
-                >
-                  <div className="font-serif text-[22px] leading-none text-[#2E2A27] sm:text-[27px]">
-                    {item.pad ? pad2(item.value) : String(item.value)}
-                  </div>
-                  <div className="mt-2 text-[9px] uppercase tracking-[0.28em] text-[#8F847B] sm:text-[10px]">
-                    {item.label}
-                  </div>
-                </div>
-              ))}
+            <div className="mt-2 text-[9px] uppercase tracking-[0.28em] text-[#8F847B] sm:text-[10px]">
+              {item.label}
             </div>
           </div>
-        </div>
-      </section>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
 
 {/* AGENDA */}
 <section id="agenda" className="relative px-5 py-24 sm:py-28">
