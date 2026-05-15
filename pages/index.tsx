@@ -136,52 +136,57 @@ const CEREMONY_AGENDA: CeremonyDay[] = [
 const ACTIVITIES: Activity[] = [
   {
     title: "Plage de Saly",
-    image: "/saly.jpg",
+    image: "/saly.png",
     text: "Sable fin, cocotiers, transat, baignade ou sieste stratégique après un bon déjeuner.",
   },
   {
     title: "Réserve de Bandia",
-    image: "/safari.jpg",
+    image: "/safari.png",
     text: "Zèbres, girafes, rhinocéros… appareil photo obligatoire. Accessible à tous, parfait pour une première immersion.",
   },
   {
     title: "Lac Rose",
-    image: "/lac-rose.jpg",
+    image: "/lac-rose.png",
     text: "Couleur unique, paysage hors du temps, parfait pour photos et découverte.",
   },
   {
     title: "Île de Gorée",
-    image: "/goree.jpg",
+    image: "/goree.png",
     text: "Histoire forte, ruelles colorées, moment calme et profond.",
   },
   {
     title: "Monument de la Renaissance",
-    image: "/renaissance.jpg",
+    image: "/renaissance.png",
     text: "Incontournable pour comprendre Dakar et repartir avec une vraie perspective.",
   },
   {
     title: "Activités nautiques",
-    image: "/nautical.jpg",
+    image: "/nautical.png",
     text: "Jet-ski, voilier, parasail… sensations + soleil, selon votre mood.",
   },
   {
+    title: "Foot 5 vs 5",
+    image: "/foot.png",
+    text: "Ligaments croisés, tu connais... on joue propre, pas besoin de forcer champion.",
+  },
+  {
     title: "Quad & Buggy",
-    image: "/quad.jpg",
+    image: "/quad.png",
     text: "Exploration des dunes autour de Saly, sensations et paysages incroyables.",
   },
   {
     title: "Karting",
-    image: "/karting.jpg",
+    image: "/karting.png",
     text: "Course fun, esprit compétition, revanche assurée à la fin.",
   },
   {
-    title: "Beach Club / Night Vibes",
-    image: "/bar.jpg",
+    title: "Night Vibes",
+    image: "/bar.png",
     text: "DJ, cocktails, ambiance tropicale chic. Pas besoin de savoir danser, juste lâcher prise.",
   },
   {
     title: "Spa / Massages",
-    image: "/spa.jpg",
+    image: "/spa.png",
     text: "Massage relaxant pour récupérer, respirer et recharger les batteries.",
   },
 ];
