@@ -390,11 +390,11 @@ export default function Home() {
               className="mx-auto mb-0 h-auto w-[235px] select-none object-contain sm:w-[170px] md:w-[255px] lg:w-[325px]"
             />
 
-            <h1 className="font-serif text-[34px] font-normal uppercase leading-[1.08] tracking-[0.24em] text-[#2E2A27] sm:text-[46px] md:text-[56px] lg:text-[54px]">
+            <h1 className="font-serif text-[24px] font-normal uppercase leading-[1.08] tracking-[0.24em] text-[#2E2A27] sm:text-[36px] md:text-[56px] lg:text-[54px]">
               Jonathan <span className="tracking-[0.12em]">&amp;</span> Manon
             </h1>
 
-            <p className="mt-4 text-[10px] uppercase tracking-[0.38em] text-[#9C8F84] sm:text-[12px]">
+            <p className="mt-4 text-[8px] uppercase tracking-[0.38em] text-[#9C8F84] sm:text-[12px]">
               vous invitent à célébrer leur mariage
             </p>
 
@@ -405,7 +405,7 @@ export default function Home() {
             </div>
 
             <div className="mt-7 space-y-4">
-              <p className="text-[11px] uppercase tracking-[0.34em] text-[#4A433E] sm:text-[13px]">
+              <p className="text-[9px] uppercase tracking-[0.34em] text-[#4A433E] sm:text-[13px]">
                 Du 31 décembre 2026 au 2 janvier 2027
               </p>
 
