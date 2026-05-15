@@ -744,7 +744,7 @@ export default function Home() {
       </p>
     </div>
 
-    <InfosPratiques />
+    <InfosPratiques onOpenRSVP={() => setOpenRSVP(true)} />
   </div>
 </section>
 
@@ -1155,7 +1155,7 @@ function RSVPModal({
   );
 }
 
-function InfosPratiques() {
+function InfosPratiques({ onOpenRSVP }: { onOpenRSVP: () => void }) {
   type InfoBlock = { label: string; lines: string[] };
   type InfoCard = {
     id: string;
@@ -1371,7 +1371,7 @@ function InfosPratiques() {
 
                 <button
                   type="button"
-                  onClick={() => setOpenRSVP(true)}
+                  onClick={onOpenRSVP}
                   className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[#2E2A27] px-6 text-[10px] uppercase tracking-[0.26em] text-white transition hover:opacity-90"
                 >
                   Confirmer ma présence
