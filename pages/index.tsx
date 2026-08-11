@@ -51,56 +51,29 @@ const WEDDING_DATE_ISO = "2027-01-02T16:00:00+01:00";
 
 const CEREMONY_AGENDA: CeremonyDay[] = [
   {
-    dayKey: "Jeudi 31",
-    dayLabel: "Jeudi 31",
-    subtitle: "Bienvenue & Réveillon",
-    items: [
-      {
-        time: "20:00",
-        title: "Cocktail de bienvenue",
-        details: "Retrouvailles, musique, ambiance Champagne & Perles.",
-      },
-      {
-        time: "23:30",
-        title: "Soirée de réveillon",
-        details: "Dancefloor + moment fort de minuit.",
-      },
-      {
-        time: "00:00",
-        title: "Feu d’artifices",
-        details: "On célèbre ensemble le passage à la nouvelle année.",
-      },
-    ],
-  },
-  {
-    dayKey: "Vendredi 1",
+    dayKey: "friday",
     dayLabel: "Vendredi",
-    subtitle: "Civil + Traditionnel",
+    subtitle: "Cérémonie traditionnelle",
     items: [
       {
-        time: "16:00",
-        title: "Mariage civil (Mairie)",
-        details: "Cérémonie civile — arrivée recommandée 15 min avant.",
-      },
-      {
-        time: "17:30",
-        title: "Cocktail",
-        details: "Photos, échanges, apéro.",
+        time: "18:30",
+        title: "Accueil des invités",
+        details: "Arrivée progressive à la villa, installation et début de soirée.",
       },
       {
         time: "19:00",
-        title: "Cérémonie traditionnelle (Batuka)",
-        details: "Moment culturel & symbolique — tenue élégante recommandée.",
+        title: "Cérémonie traditionnelle",
+        details: "Moment culturel et symbolique autour des mariés.",
       },
       {
         time: "21:00",
         title: "Dîner buffet",
-        details: "Buffet + animations.",
+        details: "Buffet, échanges et animations.",
       },
       {
         time: "23:00",
         title: "Soirée dansante",
-        details: "DJ, vibes, jusqu’au bout de la nuit.",
+        details: "Musique, ambiance et célébration jusqu’au bout de la nuit.",
       },
     ],
   },
